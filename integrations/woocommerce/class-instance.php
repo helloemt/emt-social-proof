@@ -291,6 +291,7 @@ class Emt_Wc extends Emt_Integrations {
 		$single_feed_details['rating_star']        = $rating;
 		$single_feed_details['rating_number']      = $rating;
 		$single_feed_details['is_verified']        = get_comment_meta( $comment_details['comment_ID'], 'verified', true );
+		$single_feed_data['product_link']          = get_permalink( $product_details->ID );
 		$image                                     = wp_get_attachment_image_src( get_post_thumbnail_id( $product_details->ID ), 'single-post-thumbnail' );
 		$image_url                                 = '';
 		if ( is_array( $image ) && count( $image ) > 0 ) {

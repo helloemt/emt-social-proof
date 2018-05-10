@@ -21,6 +21,9 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 = 1.0.0 =
 * Public Release
 
+= 1.1.1
+* Added: Product link merge tag in product review event type in WooCommerce.
+
 
 
 
