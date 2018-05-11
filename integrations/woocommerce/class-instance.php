@@ -53,7 +53,10 @@ class Emt_Wc extends Emt_Integrations {
 		} else {
 			$all_domains = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
 			if ( is_array( $all_domains ) && count( $all_domains ) > 0 ) {
-				$order = wc_get_order( $order_id );
+				$order       = wc_get_order( $order_id );
+				$items       = $order->get_items( array( 'line_item' ) );
+				$order_items = $items;
+				$order_data  = $this->get_order_data( $order );
 				foreach ( $all_domains as $api_key => $api_secret_key ) {
 					$event_type                      = 'woocommerce_thankyou';
 					Emt_Common::$user_api_key        = $api_key;
@@ -63,19 +66,14 @@ class Emt_Wc extends Emt_Integrations {
 					if ( is_array( $integration_data ) && isset( $integration_data['events'] ) && isset( $integration_data['events'][ $event_type ] ) ) {
 						$all_emt_events = $integration_data['events'][ $event_type ];
 						if ( is_array( $all_emt_events ) && count( $all_emt_events ) > 0 ) {
-							//                          $order_data = $order->get_data(); // The Order data
-							$order_data = $this->get_order_data( $order );
-							$items      = $order->get_items( array( 'line_item' ) );
 							if ( is_array( $items ) && count( $items ) > 0 ) {
 								$count = 1;
 								foreach ( $all_emt_events as $event_id => $event_details ) {
 									$data_to_send = $this->get_new_order_data( $order_id, $order, $order_data, $items, $event_id, $event_details, $count );
 									$count ++;
 									if ( is_array( $data_to_send ) && count( $data_to_send ) > 0 ) {
-										$data_for_coupon = array();
 										foreach ( $data_to_send as $real_data ) {
-											$data_for_coupon = $real_data;
-											$this->send_feed( $real_data, true );
+											  $this->send_feed( $real_data, true );
 										}
 										set_transient( 'emt_feed_' . $order_id, true, 1 * HOUR_IN_SECONDS );
 									}
@@ -103,23 +101,22 @@ class Emt_Wc extends Emt_Integrations {
 								}
 
 								if ( is_array( $coupons_details ) && count( $coupons_details ) > 0 ) {
-									$feeds = array();
 									$count = 1;
 									foreach ( $all_emt_events as $event_id => $event_details ) {
+										$feeds = array();
+										$data_to_send                                 = $this->get_new_order_data( $order_id, $order, $order_data, $order_items, $event_id, $event_details, $count );
 										$extra_data                                   = array(
-											'timestamp' => ( time() + $count ),
-											'order_id'  => $order_id,
-											//                                          'order_total'    => $order->get_total(),
-																							'order_total' => EMT_Compatibility::get_order_data( $order, '_order_total' ),
-											//                                          'payment_method' => $order->get_payment_method(),
-																							'payment_method' => EMT_Compatibility::get_payment_gateway_from_order( $order ),
+											'timestamp'   => ( time() + $count ),
+											'order_id'    => $order_id,
+											'order_total' => EMT_Compatibility::get_order_data( $order, '_order_total' ),
+											'payment_method' => EMT_Compatibility::get_payment_gateway_from_order( $order ),
 										);
 										$event_fields_value                           = $this->get_single_feed_data( $event_type, $order_data, array(), $event_details['fields'], $extra_data );
 										$event_fields_value['fields']                 = array_merge( $event_fields_value['fields'], $coupons_details );
-										$event_fields_value['fields']['product_id']   = $data_for_coupon['data'][0]['fields']['product_id'];
-										$event_fields_value['fields']['product_link'] = $data_for_coupon['data'][0]['fields']['product_link'];
-										$event_fields_value['fields']['product_name'] = $data_for_coupon['data'][0]['fields']['product_name'];
-										$event_fields_value['image']                  = $data_for_coupon['data'][0]['image'];
+										$event_fields_value['fields']['product_id']   = $data_to_send[0]['data'][0]['fields']['product_id'];
+										$event_fields_value['fields']['product_link'] = $data_to_send[0]['data'][0]['fields']['product_link'];
+										$event_fields_value['fields']['product_name'] = $data_to_send[0]['data'][0]['fields']['product_name'];
+										$event_fields_value['image']                  = $data_to_send[0]['data'][0]['image'];
 										$feeds[]                                      = $event_fields_value;
 										$count ++;
 										if ( is_array( $feeds ) && count( $feeds ) > 0 ) {
@@ -128,6 +125,7 @@ class Emt_Wc extends Emt_Integrations {
 											$this->send_feed( $real_data, true );
 										}
 									}
+									set_transient( 'emt_feed_' . $order_id, true, 1 * HOUR_IN_SECONDS );
 								}
 							}
 						}
@@ -291,9 +289,10 @@ class Emt_Wc extends Emt_Integrations {
 		$single_feed_details['rating_star']        = $rating;
 		$single_feed_details['rating_number']      = $rating;
 		$single_feed_details['is_verified']        = get_comment_meta( $comment_details['comment_ID'], 'verified', true );
-		$single_feed_data['product_link']          = get_permalink( $product_details->ID );
-		$image                                     = wp_get_attachment_image_src( get_post_thumbnail_id( $product_details->ID ), 'single-post-thumbnail' );
-		$image_url                                 = '';
+		$single_feed_details['product_link']       = get_permalink( $product_details->ID );
+		//      $image                                     = wp_get_attachment_image_src( get_post_thumbnail_id( $product_details->ID ), 'single-post-thumbnail' );
+		$image     = wp_get_attachment_image_src( get_post_thumbnail_id( $product_details->ID ) );
+		$image_url = '';
 		if ( is_array( $image ) && count( $image ) > 0 ) {
 			$image_url = $image[0];
 			if ( '' == $image_url ) {
@@ -301,7 +300,7 @@ class Emt_Wc extends Emt_Integrations {
 			}
 		}
 		$single_feed_details['image'] = array(
-			'type' => 'custom',
+			'type' => 'dynamic',
 			'url'  => $image_url,
 		);
 
@@ -442,22 +441,18 @@ class Emt_Wc extends Emt_Integrations {
 			$feeds                      = array();
 			$max_price_item             = array();
 			foreach ( $items as $items_key => $items_value ) {
-				//              $max_price_item[ $items_key ] = $items_value->get_total();
 				$max_price_item[ $items_key ] = EMT_Compatibility::get_item_subtotal( $order, $items_value );
 			}
-
 			// Get the max price item bcoz we will only made the feed for largest price item
 			$max_item_key = array_keys( $max_price_item, max( $max_price_item ) );
 			$max_item_key = $max_item_key[0];
 			foreach ( $items as $items_key => $items_value ) {
 				if ( $max_item_key == $items_key ) {
 					$extra_data         = array(
-						'timestamp' => ( time() + $count ),
-						'order_id'  => $order_id,
-						//                      'order_total'    => $order->get_total(),
-													'order_total' => EMT_Compatibility::get_order_data( $order, '_order_total' ),
-						//                      'payment_method' => $order->get_payment_method(),
-													'payment_method' => EMT_Compatibility::get_payment_gateway_from_order( $order ),
+						'timestamp'      => ( time() + $count ),
+						'order_id'       => $order_id,
+						'order_total'    => EMT_Compatibility::get_order_data( $order, '_order_total' ),
+						'payment_method' => EMT_Compatibility::get_payment_gateway_from_order( $order ),
 					);
 					$event_fields_value = $this->get_single_feed_data( $event_type, $order_data, $items_value, $event_details['fields'], $extra_data );
 					$feeds[]            = $event_fields_value;
