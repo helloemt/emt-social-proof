@@ -362,6 +362,7 @@ class Emt_Wc extends Emt_Integrations {
 								$args            = array(
 									'post_type' => 'product',
 									'number'    => $feed_count,
+									'status'    => 'approve',
 								);
 								$comment_details = get_comments( $args );
 								if ( is_array( $comment_details ) && count( $comment_details ) > 0 ) {
