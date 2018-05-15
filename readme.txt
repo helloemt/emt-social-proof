@@ -3,7 +3,7 @@ Contributors: amans2k, xlplugins
 Tags: EMT, Earnmore Trust, woocommerce, XLPlugins
 Requires at least: 4.2.1
 Tested up to: 4.8.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,6 +17,9 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 
 == Changelog ==
+
+= 1.1.3
+* Added: deleted the saved keys from the plugin if site for those keys are deleted from APP.
 
 = 1.1.2
 * Fixed: Imported only the approved comment in WooCommerce review event.

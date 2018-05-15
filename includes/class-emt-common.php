@@ -20,6 +20,7 @@ class Emt_Common {
 		add_action( 'wp', array( $this, 'get_integrations_data_from_emt' ) );
 		add_action( 'wp', array( $this, 'get_feeds_for_emt' ) );
 		add_action( 'wp', array( $this, 'delete_domain_data' ) );
+		add_action( 'wp_loaded', array( $this, 'check_app_sites' ) );
 	}
 
 	/**
@@ -372,6 +373,15 @@ class Emt_Common {
 	}
 
 	/**
+	 * Run app sites checking to see which sites are present in EMT.com
+	 */
+	public function check_app_sites() {
+		if ( isset( $_GET['check_app_status'] ) && '1' == $_GET['check_app_status'] ) {
+			self::check_app_keys();
+		}
+	}
+
+	/**
 	 * @param $site_api_key
 	 *
 	 * Deletes the site data from current WordPress site.
@@ -511,6 +521,24 @@ class Emt_Common {
 		$response                  = self::activate_license();
 
 		return $response;
+	}
+
+	/**
+	 * This function check if the keys of saved sites are still available on EMT.com
+	 */
+	public static function check_app_keys() {
+		$all_domains = get_option( 'emt_all_domains' );
+		if ( is_array( $all_domains ) && count( $all_domains ) > 0 ) {
+			foreach ( $all_domains as $api_key => $api_secret_key ) {
+				Emt_Common::$user_api_key        = $api_key;
+				Emt_Common::$user_api_secret_key = $api_secret_key;
+				$token                           = Emt_Common::activate_license();
+				if ( isset( $token['code'] ) ) {
+					unset( $all_domains[ $api_key ] );
+				}
+			}
+			self::emt_update_option( 'emt_all_domains', $all_domains );
+		}
 	}
 
 }
