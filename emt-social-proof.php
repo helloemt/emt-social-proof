@@ -68,16 +68,7 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 			define( 'EMT_SOURCE_PL_DIR', __DIR__ );
 			define( 'EMT_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 			define( 'EMT_SHORT_SLUG', 'emt_' );
-
-			if ( 'pixiwrapper.com' == $_SERVER['HTTP_HOST'] ) {
-				define( 'EMT_DOMAIN', 'http://pixiwrapper.com/' );
-			} elseif ( 'localhost' == $_SERVER['HTTP_HOST'] ) {
-				define( 'EMT_DOMAIN', 'http://pixiwrapper.com/' );
-			} else {
-				//              define( 'EMT_DOMAIN', 'https://app.earnmoretrust.com/' );
-				define( 'EMT_DOMAIN', 'https://stapp.earnmoretrust.com/' );
-			}
-
+			define( 'EMT_DOMAIN', 'https://app.earnmoretrust.com/' );
 			define( 'EMT_INTEGRATION_POSTFIX', 'integrations_data' );
 			define( 'EMT_GET_ALL_INFO_ENDPOINT', 'api/v1.0/event/getInfo' );
 			define( 'EMT_PUSH_SINGLE_FEED_ENDPOINT', 'api/v1.0/feeds/add' );
@@ -250,7 +241,7 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 				wp_redirect(
 					add_query_arg(
 						array(
-							'page' => 'emt-plugin-settings',
+							'page'             => 'emt-plugin-settings',
 							'check_app_status' => '1',
 						), admin_url( 'admin.php' )
 					)
