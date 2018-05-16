@@ -66,6 +66,10 @@ class Emt_Gf extends Emt_Integrations {
 										if ( 'ip' == $key4 ) {
 											continue;
 										}
+										if ( 'email' == $key4 ) {
+											$event_fields_value_temp['email'] = $value4;
+											continue;
+										}
 										$array_key                             = $key4 . ':' . $temp_structure[ $key4 ];
 										$event_fields_value_temp[ $array_key ] = $value4;
 									}
@@ -151,6 +155,9 @@ class Emt_Gf extends Emt_Integrations {
 							if ( is_array( $multiselect ) && count( $multiselect ) > 0 ) {
 								$entries_to_return[ $value1['id'] ]['fields'][ $key2 ] = implode( ', ', $multiselect );
 							} else {
+								if ( filter_var( $value1[ $key2 ], FILTER_VALIDATE_EMAIL ) ) {
+									$entries_to_return[ $value1['id'] ]['fields']['email'] = $value1[ $key2 ];
+								}
 								$entries_to_return[ $value1['id'] ]['fields'][ $key2 ] = $value1[ $key2 ];
 							}
 							$entries_to_return[ $value1['id'] ]['fields']['ip'] = $value1['ip'];
@@ -178,7 +185,6 @@ class Emt_Gf extends Emt_Integrations {
 				}
 			}
 		}
-
 		return $entries_to_return;
 	}
 

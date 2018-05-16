@@ -434,6 +434,10 @@ class Emt_Common {
 							if ( 'ip' == $key4 ) {
 								$array_key = $key4;
 							}
+							if ( 'email' == $key4 ) {
+								$event_fields_value_temp['email'] = $value4;
+								continue;
+							}
 							$event_fields_value_temp[ $array_key ] = $value4;
 						}
 						$single_array                    = array(
