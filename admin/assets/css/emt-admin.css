@@ -135,3 +135,93 @@
 .emt-remove-site {
     float: right;
 }
+.emt-integrations-settings * {
+    box-sizing: border-box
+}
+
+.emt-integrations-settings {
+    font-family: "Lato", sans-serif;
+}
+
+/* Style the tab */
+.emt_tab {
+    float: left;
+    border: 1px solid #ccc;
+    /*background-color: #e5e5e5;*/
+    background-color: rgb(241, 241, 241);
+    width: 18%;
+    min-height: 300px;
+}
+
+/* Style the buttons inside the tab */
+.emt_tab button, .emt_tab a {
+    display: block;
+    /*background-color: #e5e5e5;*/
+    background-color: rgb(241, 241, 241);
+    color: black;
+    padding: 15px 10px;
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Change background color of buttons on hover */
+.emt_tab button:hover, .emt_tab a:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current "tab button" class */
+.emt_tab button.active, .emt_tab a.active {
+    /*background-color: #f1f1f1;*/
+    background-color: #e5e5e5;
+    box-shadow: none;
+}
+
+.emt_tab a:active, .emt_tab a:visited, .emt_tab a:focus {
+    border: none;
+}
+
+/* Style the tab content */
+.emt_tabcontent {
+    float: left;
+    padding: 0px 12px;
+    border: 1px solid #ccc;
+    width: 82%;
+    border-left: none;
+    height: 300px;
+    display: none;
+}
+
+.emt_tabcontent.active {
+    display: block;
+    position: relative;
+}
+
+.emt-form-gp {
+    margin: 15px 0;
+    display: inline-block;
+    width: 100%;
+}
+.emt-select{
+    width: 400px;
+    height: 200px;
+}
+.emt-form-label{
+    margin-right: 10px;
+    width: 175px;
+    display: inline-block;
+}
+.emt-pos-abs{
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+}
+.emt-pos-abs .spinner.is-active{
+    float: none;
+}

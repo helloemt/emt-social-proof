@@ -4,7 +4,7 @@
  * Plugin Name: EMT Social Proof - XLPlugins
  * Plugin URI: https://xlplugins.com/
  * Description: Sends feeds from your WordPress website
- * Version: 1.1.4
+ * Version: 1.1.7
  * Author: XLPlugins
  * Author URI: https://www.xlplugins.com
  * License: GPLv3 or later
@@ -31,8 +31,10 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 		protected static $service_dir;
 		public static $integrations;
 		public static $active_integrations = array(
-			'gf' => 'gf',
-			'wc' => 'wc',
+			'gf'  => 'gf',
+			'wc'  => 'wc',
+			'cf7' => 'cf7',
+			'edd' => 'edd',
 		);
 
 		public function __construct() {
@@ -62,7 +64,7 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 		public function define_plugin_properties() {
 			/*             * ****** DEFINING CONSTANTS ********* */
 			define( 'EMTCORE_ENDPOINT', 'emtclient' );
-			define( 'EMT_VERSION', '1.1.4' );
+			define( 'EMT_VERSION', '1.1.7' );
 			define( 'EMT_NAME', 'EarnMoreTrust' );
 			define( 'EMT_PLUGIN_FILE', __FILE__ );
 			define( 'EMT_SOURCE_PL_DIR', __DIR__ );
@@ -146,20 +148,16 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 						}
 						wp_send_json( $integration_object->response );
 					} else {
-						wp_send_json(
-							array(
+						wp_send_json( array(
 								'code'  => 4001,
 								'error' => 'Invalid Token',
-							)
-						);
+							) );
 					}
 				} else {
-					wp_send_json(
-						array(
+					wp_send_json( array(
 							'code'  => 4000,
 							'error' => 'Invalid Method for Url',
-						)
-					);
+						) );
 				}
 				exit;
 			}
@@ -183,6 +181,10 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 						$needed_file = self::$service_dir . '/' . $entry . '/class-instance.php';
 						if ( file_exists( $needed_file ) ) {
 							$temp = include_once $needed_file;
+							if ( ! class_exists( $temp->plugin_class_name ) ) {
+								continue;
+							}
+
 							if ( in_array( $temp->slug, self::$active_integrations ) ) {
 								$temp_slug                  = $temp->slug;
 								$integrations[ $temp_slug ] = $temp;
@@ -238,14 +240,10 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 		public function xlutm_settings_redirect( $plugin ) {
 			if ( plugin_basename( __FILE__ ) == $plugin ) {
 				// redirect to plugin settings page if available
-				wp_redirect(
-					add_query_arg(
-						array(
-							'page'             => 'emt-plugin-settings',
-							'check_app_status' => '1',
-						), admin_url( 'admin.php' )
-					)
-				);
+				wp_redirect( add_query_arg( array(
+						'page'             => 'emt-plugin-settings',
+						'check_app_status' => '1',
+					), admin_url( 'admin.php' ) ) );
 				exit;
 			}
 		}

@@ -9,6 +9,9 @@ class Emt_Wc extends Emt_Integrations {
 	public $plugin_class_name               = 'WooCommerce';
 	public $comment_post_default_keys       = array( 'product_id', 'email', 'ip', 'is_verified' );
 	public $integration_name                = 'WooCommerce';
+	public $current_event_type              = null;
+	public $has_settings                    = true;
+	public $search_posttype                 = 'product';
 
 	public static function get_instance() {
 		if ( null == self::$instance ) {
@@ -59,6 +62,7 @@ class Emt_Wc extends Emt_Integrations {
 				$order_data  = $this->get_order_data( $order );
 				foreach ( $all_domains as $api_key => $api_secret_key ) {
 					$event_type                      = 'woocommerce_thankyou';
+					$this->current_event_type        = $event_type;
 					Emt_Common::$user_api_key        = $api_key;
 					Emt_Common::$user_api_secret_key = $api_secret_key;
 					$integration_data                = Emt_Common::emt_get_option( EMT_SHORT_SLUG . EMT_INTEGRATION_POSTFIX . '_' . $api_key );
@@ -85,8 +89,9 @@ class Emt_Wc extends Emt_Integrations {
 					$event_type = 'woocommerce_coupon_used';
 					$real_data  = array();
 					if ( is_array( $integration_data ) && isset( $integration_data['events'] ) && isset( $integration_data['events'][ $event_type ] ) ) {
-						$all_emt_events = $integration_data['events'][ $event_type ];
-						$items          = $order->get_items( array( 'coupon' ) );
+						$this->current_event_type = $event_type;
+						$all_emt_events           = $integration_data['events'][ $event_type ];
+						$items                    = $order->get_items( array( 'coupon' ) );
 						if ( is_array( $all_emt_events ) && count( $all_emt_events ) > 0 ) {
 							if ( is_array( $items ) && count( $items ) > 0 ) {
 								$coupons_details      = array();
@@ -103,7 +108,7 @@ class Emt_Wc extends Emt_Integrations {
 								if ( is_array( $coupons_details ) && count( $coupons_details ) > 0 ) {
 									$count = 1;
 									foreach ( $all_emt_events as $event_id => $event_details ) {
-										$feeds = array();
+										$feeds                                        = array();
 										$data_to_send                                 = $this->get_new_order_data( $order_id, $order, $order_data, $order_items, $event_id, $event_details, $count );
 										$extra_data                                   = array(
 											'timestamp'   => ( time() + $count ),
@@ -203,8 +208,9 @@ class Emt_Wc extends Emt_Integrations {
 	 * @param $comment_id
 	 */
 	public function send_single_product_review_feed( $comment_id ) {
-		$event_type  = 'comment_post';
-		$all_domains = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
+		$event_type               = 'comment_post';
+		$this->current_event_type = $event_type;
+		$all_domains              = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
 		if ( is_array( $all_domains ) && count( $all_domains ) > 0 ) {
 			foreach ( $all_domains as $api_key => $api_secret_key ) {
 				Emt_Common::$user_api_key        = $api_key;
@@ -274,12 +280,18 @@ class Emt_Wc extends Emt_Integrations {
 	 */
 
 	public function get_single_comment_data( $comment_details ) {
-		$comment_details     = (array) $comment_details;
-		$single_feed_details = array();
-		$post_id             = $comment_details['comment_post_ID'];
-		$product_details     = get_post( $post_id );
-		$rating              = get_comment_meta( $comment_details['comment_ID'], 'rating', true );
-
+		$comment_details      = (array) $comment_details;
+		$single_feed_details  = array();
+		$post_id              = $comment_details['comment_post_ID'];
+		$product_details      = get_post( $post_id );
+		$rating               = get_comment_meta( $comment_details['comment_ID'], 'rating', true );
+		$excluded_product_ids = Emt_Common::get_excluded_product_ids( $this->slug );
+		if ( is_array( $excluded_product_ids ) && count( $excluded_product_ids ) > 0 ) {
+			if ( in_array( $product_details->ID, $excluded_product_ids ) ) {
+				// the comment is not eligible for converting into a feed as the product associated with this comment is exluded
+				return $single_feed_details;
+			}
+		}
 		$single_feed_details['product_id']         = $product_details->ID;
 		$single_feed_details['product_name']       = $product_details->post_title;
 		$single_feed_details['customer_full_name'] = $this->capitalize_word( $comment_details['comment_author'] );
@@ -318,8 +330,9 @@ class Emt_Wc extends Emt_Integrations {
 	 * @return array
 	 */
 	public function get_data_for_syncing( $integration_type, $event_type, $feed_count, $event_id, $api_key, $api_secret_key ) {
-		$data_to_send = array();
-		$all_domains  = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
+		$this->current_event_type = $event_type;
+		$data_to_send             = array();
+		$all_domains              = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
 		if ( isset( $all_domains[ $api_key ] ) && '' != $all_domains[ $api_key ] ) {
 			$integration_data = Emt_Common::emt_get_option( EMT_SHORT_SLUG . EMT_INTEGRATION_POSTFIX . '_' . $api_key );
 			$integration_data = $integration_data[ $integration_type ];
@@ -434,23 +447,37 @@ class Emt_Wc extends Emt_Integrations {
 	 * This function takes order and event details and return all the feeds for a event with feed schema
 	 */
 	public function get_new_order_data( $order_id, $order, $order_data, $items, $event_id, $event_details, $count ) {
-		$final_data = array();
-		$event_type = 'woocommerce_thankyou';
+		$excluded_product_ids = Emt_Common::get_excluded_product_ids( $this->slug );
+		$final_data           = array();
+		$event_type           = 'woocommerce_thankyou';
 		if ( is_array( $items ) && count( $items ) > 0 ) {
 			$data_to_send               = array();
 			$data_to_send['trigger_id'] = $event_id;
 			$feeds                      = array();
 			$max_price_item             = array();
 			foreach ( $items as $items_key => $items_value ) {
+				$product_id = $items_value->get_product_id();
+				if ( is_array( $excluded_product_ids ) && count( $excluded_product_ids ) > 0 ) {
+					if ( in_array( $product_id, $excluded_product_ids ) ) {
+						continue;
+					}
+				}
 				$max_price_item[ $items_key ] = EMT_Compatibility::get_item_subtotal( $order, $items_value );
 			}
+
+			// No product eligible for becoming a feed
+			if ( is_array( $max_price_item ) && 0 == count( $max_price_item ) ) {
+				return $final_data;
+			}
+
 			// Get the max price item bcoz we will only made the feed for largest price item
 			$max_item_key = array_keys( $max_price_item, max( $max_price_item ) );
 			$max_item_key = $max_item_key[0];
 			foreach ( $items as $items_key => $items_value ) {
 				if ( $max_item_key == $items_key ) {
+					$timestamp          = ( isset( $order_data['timestamp'] ) ) ? $order_data['timestamp'] : time();
 					$extra_data         = array(
-						'timestamp'      => ( time() + $count ),
+						'timestamp'      => ( $timestamp + $count ),
 						'order_id'       => $order_id,
 						'order_total'    => EMT_Compatibility::get_order_data( $order, '_order_total' ),
 						'payment_method' => EMT_Compatibility::get_payment_gateway_from_order( $order ),
@@ -583,6 +610,7 @@ class Emt_Wc extends Emt_Integrations {
 	 * @return array
 	 */
 	public function get_order_data( $order ) {
+		$actual_timestamp                    = time();
 		$order_data                          = array();
 		$order_data['billing']['first_name'] = EMT_Compatibility::get_order_data( $order, '_billing_first_name' );
 		$order_data['billing']['last_name']  = EMT_Compatibility::get_order_data( $order, '_billing_last_name' );
@@ -598,7 +626,30 @@ class Emt_Wc extends Emt_Integrations {
 		$order_data['customer_ip_address'] = EMT_Compatibility::get_order_data( $order, '_customer_ip_address' );
 		$order_data['email']               = EMT_Compatibility::get_order_data( $order, '_billing_email' );
 
+		if ( 'woocommerce_thankyou' == $this->current_event_type ) {
+			$timestamp = EMT_Compatibility::get_order_date( $order );
+			if ( $timestamp instanceof DateTime ) {
+				$actual_timestamp = strtotime( $timestamp->format( 'Y-m-d H:i:s' ) );
+			} else {
+				$actual_timestamp = strtotime( $timestamp );
+			}
+		} else {
+			$timestamp = $order->get_date_completed();
+			if ( $timestamp instanceof DateTime ) {
+				$actual_timestamp = strtotime( $timestamp->format( 'Y-m-d H:i:s' ) );
+			}
+		}
+
+		$order_data['timestamp'] = $actual_timestamp;
+
 		return $order_data;
+	}
+
+	/**
+	 * Shows the settings page of the integration
+	 */
+	public function get_settings_page() {
+		include_once 'settings.php';
 	}
 
 }

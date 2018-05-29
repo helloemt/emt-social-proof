@@ -8,9 +8,11 @@ class Emt_Admin {
 	protected static $instance               = null;
 	public $is_plugin_settings_saved         = false;
 	public $is_plugin_settings_saved_message = '';
+	public $is_plugin_admin_page             = false;
 
 	public function __construct() {
 		/** Load all admin hooks **/
+		$this->check_plugin_admin_page();
 		$this->hooks();
 	}
 
@@ -25,6 +27,15 @@ class Emt_Admin {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Check if the plugin admin page is currently opened
+	 */
+	public function check_plugin_admin_page() {
+		if ( isset( $_GET['page'] ) && 'emt-plugin-settings' == $_GET['page'] ) {
+			$this->is_plugin_admin_page = true;
+		}
 	}
 
 	/**
@@ -54,9 +65,14 @@ class Emt_Admin {
 	 */
 
 	public function emt_admin_enqueue_scripts() {
-		wp_enqueue_style( 'emt-admin-css', $this->get_admin_url() . '/assets/css/emt-admin.css', false, EMT_VERSION );
-		wp_register_script( 'emt-admin-js', $this->get_admin_url() . '/assets/js/emt-admin.js', array( 'jquery' ), EMT_VERSION, true );
-		wp_enqueue_script( 'emt-admin-js' );
+		if ( $this->is_plugin_admin_page ) {
+			wp_enqueue_style( 'emt-select2-css', $this->get_admin_url() . '/assets/css/select2.min.css', false, EMT_VERSION );
+			wp_enqueue_style( 'emt-admin-css', $this->get_admin_url() . '/assets/css/emt-admin.css', false, EMT_VERSION );
+			wp_register_script( 'emt-select2-js', $this->get_admin_url() . '/assets/js/select2.full.js', array( 'jquery' ), EMT_VERSION, true );
+			wp_enqueue_script( 'emt-select2-js' );
+			wp_register_script( 'emt-admin-js', $this->get_admin_url() . '/assets/js/emt-admin.js', array( 'jquery' ), EMT_VERSION, true );
+			wp_enqueue_script( 'emt-admin-js' );
+		}
 	}
 
 	/*
@@ -132,9 +148,9 @@ class Emt_Admin {
 			<div class="metabox-holder columns-2" id="post-body">
 				<div id="post-body-content">
 					<div id="normal-sortables" class="meta-box-sortables ui-sortable wuev_content">
-						<div id="dashboard_right_now" class="postbox">
+						<div id="dashboard_right_now_" class="postbox">
 							<h2 class="hndle ui-sortable-handle">
-								<span><?php echo __( 'Enter Your Site Api Keys', 'emt-social-proof' ); ?></span></h2>
+								<span><?php echo Emt_Common::get_tab_headings( $current ); ?></span></h2>
 							<div class="inside">
 								<div class="main">
 									<form method="post" class="emt-forms">
@@ -146,7 +162,7 @@ class Emt_Admin {
 										if ( 'emt-license-activation' == $current ) {
 											//                                          ( '' != $update_submit_button_text ) ? submit_button( $update_submit_button_text ) : '';
 											//                                          ( '' != $sync_submit_button_text ) ? submit_button( $sync_submit_button_text ) : '';
-											//                                          submit_button( $submit_button_text );
+											//                                                                                    submit_button( $submit_button_text );
 										}
 										?>
 									</form>
@@ -302,6 +318,7 @@ class Emt_Admin {
 						'api_key'        => $_POST['api_key'],
 						'api_secret_key' => $_POST['api_secret_key'],
 					);
+
 					if ( is_array( $result ) && count( $result ) > 0 ) {
 						$result_sync = Emt_Common::emt_api_call( EMT_DOMAIN . EMT_SYNCWP_ENDPOINT, $result, $token );
 						if ( isset( $result_sync['code'] ) && '1006' == $result_sync['code'] ) {
@@ -333,6 +350,26 @@ class Emt_Admin {
 							'message' => 'Your Website has no supported Integrations',
 						);
 					}
+				}
+				break;
+			case 'integrations_settings':
+				$excluded_products_option_key = 'emt_excluded_' . $_POST['emt_integration_slug'];
+				$exluded_products             = ( isset( $_POST['products'] ) ) ? $_POST['products'] : array();
+				update_option( $excluded_products_option_key, $exluded_products );
+				$message  = __( 'Settings Saved', 'emt-social-proof' );
+				$response = array(
+					'status'  => '1',
+					'message' => $message,
+				);
+				break;
+			case 'emt_exclude_product_search':
+				$search_term = $_POST['search_term']['term'];
+				$post_type   = $_POST['emt_posttype'];
+				$results     = Emt_Common::get_excluded_products( $search_term, $post_type );
+				if ( is_array( $results ) && count( $results ) > 0 ) {
+					$response = $results['search_results'];
+				} else {
+					$response = array();
 				}
 				break;
 		}

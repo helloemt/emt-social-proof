@@ -178,9 +178,10 @@ class Emt_Gf extends Emt_Integrations {
 							} else {
 								$entries_to_return[ $value1['id'] ]['fields'][ $key2 ] = implode( ', ', $checkbox_or_address[ $key2 ] );
 							}
-
 							$entries_to_return[ $value1['id'] ]['fields']['ip'] = $value1['ip'];
 						}
+
+						$entries_to_return[ $value1['id'] ]['timestamp'] = strtotime( $value1['date_created'] );
 					}
 				}
 			}

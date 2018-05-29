@@ -6,6 +6,8 @@
         emt_sync_site();
         emt_api_keys();
         emt_check_repeator_count();
+        emt_integrations_settings_tabs();
+        emt_integrations_settings();
     });
 
     function emt_start_repeator() {
@@ -134,6 +136,89 @@
         else {
             $('.emt-minus').show();
         }
+    }
+
+    function emt_integrations_settings_tabs(){
+        $(document).on('click', '.emt_tablinks', function () {
+            var $this = $(this);
+            if($this.hasClass('active')){
+
+            }
+            else{
+                $('.emt_tablinks').removeClass('active');
+                $('.emt_tabcontent').removeClass('active');
+
+                $this.addClass('active');
+                var tab_to_make_active = '#'+$this.attr('data-section');
+                $(tab_to_make_active).addClass('active');
+            }
+        });
+    }
+
+    function emt_integrations_settings(){
+        // $('.js-example-basic-multiple').each(function(){
+            var $this = $(this);
+            $('.js-example-basic-multiple').select2({
+            // $this.select2({
+                minimumInputLength: 2,
+                placeholder: "Select Products",
+                multiple: true,
+                ajax: {
+                    url: ajaxurl,
+                    dataType: 'json',
+                    type: "POST",
+                    delay: 250,
+                    data: function (term) {
+                        return {
+                            search_term: term,
+                            action: 'emt_soc_ajax_operations',
+                            type: 'emt_exclude_product_search',
+                            emt_posttype: $('.emt_tabcontent.active').find('.emt_posttype').val(),
+                        };
+                    },
+                    results: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.text,
+                                    id: item.id
+                                }
+                            })
+                        };
+                    },
+                },
+            });
+        // });
+
+
+        $(document).on('submit','.emt-forms',function () {
+            var $this = $(this);
+            var setting_type = $('.emt_tabcontent.active').find('.emt_setting_type').val();
+            var integration_slug = $('.emt_tabcontent.active').find('.emt_integration_slug').val();
+            var form_data = new FormData($this[0]);
+            form_data.append('action', 'emt_soc_ajax_operations');
+            form_data.append('type', setting_type);
+            form_data.append('emt_integration_slug', integration_slug);
+            $('.spinner').addClass('is-active');
+            $('.emt-notice').remove();
+            jQuery.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: form_data,
+                contentType: false,
+                cache: false,
+                processData: false,
+                async: false,
+                success: function (response) {
+                    if (response.status == '1') {
+                        $('.nav-tab-wrapper').prepend('<div class="updated notice emt-notice"><p>' + response.message + '</p></div>');
+                    }
+                    $('.spinner').removeClass('is-active');
+                }
+            });
+
+            return false;
+        });
     }
 
 })(jQuery);

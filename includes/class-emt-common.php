@@ -204,11 +204,27 @@ class Emt_Common {
 	public static function get_default_plugin_settings_tabs() {
 		$my_plugin_tabs = array(
 			'emt-license-activation' => __( 'Settings', 'emt-social-proof' ),
-		//          'emt-integrations'       => __( 'EMT Integrations', 'emt-social-proof' ),
+			'emt-integrations'       => __( 'Integrations', 'emt-social-proof' ),
 		//          'emt-events'             => __( 'EMT Events', 'emt-social-proof' ),
 		);
 
 		return $my_plugin_tabs;
+	}
+
+	/**
+	 * This function returns the tab heading of current active tab
+	 *
+	 * @param $tab
+	 *
+	 * @return mixed
+	 */
+	public static function get_tab_headings( $tab ) {
+		$my_plugin_tabs = array(
+			'emt-license-activation' => __( 'Enter Your Site Api Keys', 'emt-social-proof' ),
+			'emt-integrations'       => __( 'Integrations Settings', 'emt-social-proof' ),
+		);
+
+		return $my_plugin_tabs[ $tab ];
 	}
 
 	public static function http() {
@@ -281,6 +297,12 @@ class Emt_Common {
 					$gf_forms_data = $GLOBALS['Emt_Social_Proof']->get_integration( 'gf' )->get_all_gf_forms_with_fields();
 					if ( is_array( $gf_forms_data ) && count( $gf_forms_data ) > 0 ) {
 						$response['gf_data'] = json_encode( $gf_forms_data );
+					}
+				}
+				if ( isset( $activated_integrations['cf7'] ) ) {
+					$forms_data = $GLOBALS['Emt_Social_Proof']->get_integration( 'cf7' )->get_all_forms_with_fields();
+					if ( is_array( $forms_data ) && count( $forms_data ) > 0 ) {
+						$response['cf7_data'] = json_encode( $forms_data );
 					}
 				}
 			}
@@ -441,7 +463,7 @@ class Emt_Common {
 							$event_fields_value_temp[ $array_key ] = $value4;
 						}
 						$single_array                    = array(
-							'timestamp' => ( time() + $count ),
+							'timestamp' => ( $value1['timestamp'] + $count ),
 							'fields'    => $event_fields_value_temp,
 						);
 						$final_event_fields_value_temp[] = $single_array;
@@ -543,6 +565,53 @@ class Emt_Common {
 			}
 			self::emt_update_option( 'emt_all_domains', $all_domains );
 		}
+	}
+
+	/**
+	 * This function returns the product_ids which are excluded from the plugin settings screen.
+	 *
+	 * @param $integration_slug
+	 *
+	 * @return mixed|void
+	 */
+	public static function get_excluded_product_ids( $integration_slug ) {
+		return get_option( 'emt_excluded_' . $integration_slug );
+	}
+
+	public static function get_excluded_products( $search_term = null, $post_type, $excluded_products = null ) {
+		$final_result  = array();
+		$search_result = array();
+		$result        = array();
+		$args          = array(
+			'numberposts' => -1,
+			'post_type'   => $post_type,
+			'post_status' => 'publish',
+		);
+
+		if(!is_null( $search_term)){
+			$args['s'] = $search_term;
+		}
+
+		if(is_array( $excluded_products) && count($excluded_products) > 0){
+			$args['post__in'] = $excluded_products;
+		}
+
+		$products = get_posts( $args );
+
+		if ( is_array( $products ) && count( $products ) > 0 ) {
+			foreach ( $products as $key1 => $value1 ) {
+				$result[ $value1->ID ] = $value1->post_title;
+				$search_result[]       = array(
+					'id'   => $value1->ID,
+					'text' => $value1->post_title,
+				);
+			}
+			$final_result['results']           = $search_result;
+			$final_result['search_results']    = $final_result;
+			$final_result['excluded_products'] = $result;
+		}
+
+		return $final_result;
 	}
 
 }
