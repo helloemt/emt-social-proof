@@ -148,16 +148,20 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 						}
 						wp_send_json( $integration_object->response );
 					} else {
-						wp_send_json( array(
+						wp_send_json(
+							array(
 								'code'  => 4001,
 								'error' => 'Invalid Token',
-							) );
+							)
+						);
 					}
 				} else {
-					wp_send_json( array(
+					wp_send_json(
+						array(
 							'code'  => 4000,
 							'error' => 'Invalid Method for Url',
-						) );
+						)
+					);
 				}
 				exit;
 			}
@@ -240,10 +244,14 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 		public function xlutm_settings_redirect( $plugin ) {
 			if ( plugin_basename( __FILE__ ) == $plugin ) {
 				// redirect to plugin settings page if available
-				wp_redirect( add_query_arg( array(
-						'page'             => 'emt-plugin-settings',
-						'check_app_status' => '1',
-					), admin_url( 'admin.php' ) ) );
+				wp_redirect(
+					add_query_arg(
+						array(
+							'page'             => 'emt-plugin-settings',
+							'check_app_status' => '1',
+						), admin_url( 'admin.php' )
+					)
+				);
 				exit;
 			}
 		}

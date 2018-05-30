@@ -42,7 +42,7 @@ class Emt_Admin {
 	 * Fires all the admin hooks
 	 */
 	public function hooks() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'emt_admin_enqueue_scripts' ), 11 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'emt_admin_enqueue_scripts' ),11 );
 		add_action( 'admin_menu', array( $this, 'emt_plugin_menu' ) );
 		add_action( 'init', array( $this, 'save_tab_settings' ), 9 );
 		add_action( 'admin_notices', array( $this, 'show_tab_messages' ) );
@@ -66,10 +66,12 @@ class Emt_Admin {
 
 	public function emt_admin_enqueue_scripts() {
 		if ( $this->is_plugin_admin_page ) {
+			wp_dequeue_script( 'select2' );
+			wp_deregister_script( 'select2' );
 			wp_enqueue_style( 'emt-select2-css', $this->get_admin_url() . '/assets/css/select2.min.css', false, EMT_VERSION );
 			wp_enqueue_style( 'emt-admin-css', $this->get_admin_url() . '/assets/css/emt-admin.css', false, EMT_VERSION );
-			wp_register_script( 'emt-select2-js', $this->get_admin_url() . '/assets/js/select2.full.js', array( 'jquery' ), EMT_VERSION, true );
-			wp_enqueue_script( 'emt-select2-js' );
+			wp_register_script( 'select2', $this->get_admin_url() . '/assets/js/select2.full.js', array( 'jquery' ), EMT_VERSION, true );
+			wp_enqueue_script( 'select2' );
 			wp_register_script( 'emt-admin-js', $this->get_admin_url() . '/assets/js/emt-admin.js', array( 'jquery' ), EMT_VERSION, true );
 			wp_enqueue_script( 'emt-admin-js' );
 		}
