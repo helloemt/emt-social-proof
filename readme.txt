@@ -6,6 +6,7 @@ Tested up to: 4.8.1
 Stable tag: 1.1.7
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
+~Current Version:1.7~
 
 == Description ==
 

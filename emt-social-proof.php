@@ -224,6 +224,7 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 
 			if ( is_admin() ) {
 				// admin
+				require'includes/updater.php';
 				require 'admin/class-emt-admin.php';
 			} else {
 				// public
