@@ -21,7 +21,7 @@ class Emt_Common {
 		add_action( 'wp', array( $this, 'get_feeds_for_emt' ) );
 		add_action( 'wp', array( $this, 'delete_domain_data' ) );
 		add_action( 'wp_loaded', array( $this, 'check_app_sites' ) );
-		add_action( 'admin_head-plugins.php', array( $this, 'check_plugin_update' ) );
+		add_action( 'init', array( $this, 'check_plugin_update' ) );
 	}
 
 	/**
@@ -615,24 +615,27 @@ class Emt_Common {
 		return $final_result;
 	}
 
+
+	/**
+	 * This checks the new plugin version on github repo
+	 */
 	public function check_plugin_update() {
 		if ( class_exists( 'WPGitHubUpdater' ) || class_exists( 'WP_GitHub_Updater' ) ) {
 			$config = array(
-				'slug'               => EMT_PLUGIN_BASENAME, // this is the slug of your plugin
-				'proper_folder_name' => 'emt-social-proof', // this is the name of the folder your plugin lives in
-				'api_url'            => 'https://api.github.com/repos/helloemt/emt-social-proof', // the GitHub API url of your GitHub repo
-				'raw_url'            => 'https://raw.github.com/helloemt/emt-social-proof/master', // the GitHub raw url of your GitHub repo
-				'github_url'         => 'https://github.com/helloemt/emt-social-proof', // the GitHub url of your GitHub repo
-				'zip_url'            => 'https://github.com/helloemt/emt-social-proof/archive/master.zip', // the zip url of the GitHub repo
-				'sslverify'          => true, // whether WP should check the validity of the SSL cert when getting an update, see https://github.com/jkudish/WordPress-GitHub-Plugin-Updater/issues/2 and https://github.com/jkudish/WordPress-GitHub-Plugin-Updater/issues/4 for details
-				'requires'           => '4.2.1', // which version of WordPress does your plugin require?
-				'tested'             => '4.8.1', // which version of WordPress is your plugin tested up to?
-				'readme'             => 'readme.txt', // which file to use as the readme for the version number
-				'access_token'       => '', // Access private repositories by authorizing under Appearance > GitHub Updates when this example plugin is installed
+				'plugin_file'        => EMT_PLUGIN_BASENAME,
+				'slug'               => 'emt-social-proof',
+				'proper_folder_name' => 'emt-social-proof',
+				'api_url'            => 'https://api.github.com/repos/helloemt/emt-social-proof',
+				'github_url'         => 'https://github.com/helloemt/emt-social-proof',
+				'requires'           => '4.2.1',
+				'tested'             => '4.9.6',
+				'readme'             => 'readme.txt',
+				'raw_url'            => 'https://raw.github.com/helloemt/emt-social-proof/master',
+				'zip_url'            => 'https://github.com/helloemt/emt-social-proof/zipball/master',
+				'sslverify'          => true,
 			);
-			new WP_GitHub_Updater($config);
+			new WP_GitHub_Updater( $config );
 		}
-
 	}
 
 }

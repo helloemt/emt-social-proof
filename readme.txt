@@ -3,10 +3,10 @@ Contributors: amans2k, xlplugins
 Tags: EMT, Earnmore Trust, woocommerce, XLPlugins
 Requires at least: 4.2.1
 Tested up to: 4.8.1
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-~Current Version:1.7~
+~Current Version:1.1.8~
 
 == Description ==
 
@@ -18,6 +18,9 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 
 == Changelog ==
+
+= 1.1.8
+* Added: Auto update plugin from github repo.
 
 = 1.1.7
 * Added: Added Setting for Excluding Products in WC and EDD.

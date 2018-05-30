@@ -4,7 +4,7 @@
  * Plugin Name: EMT Social Proof - XLPlugins
  * Plugin URI: https://xlplugins.com/
  * Description: Sends feeds from your WordPress website
- * Version: 1.1.7
+ * Version: 1.1.8
  * Author: XLPlugins
  * Author URI: https://www.xlplugins.com
  * License: GPLv3 or later
@@ -64,11 +64,12 @@ if ( ! class_exists( 'Emt_Social_Proof' ) ) :
 		public function define_plugin_properties() {
 			/*             * ****** DEFINING CONSTANTS ********* */
 			define( 'EMTCORE_ENDPOINT', 'emtclient' );
-			define( 'EMT_VERSION', '1.1.7' );
+			define( 'EMT_VERSION', '1.1.8' );
 			define( 'EMT_NAME', 'EarnMoreTrust' );
 			define( 'EMT_PLUGIN_FILE', __FILE__ );
 			define( 'EMT_SOURCE_PL_DIR', __DIR__ );
 			define( 'EMT_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+			define( 'EMT_FULL_SLUG', 'emt-social-proof' );
 			define( 'EMT_SHORT_SLUG', 'emt_' );
 			define( 'EMT_DOMAIN', 'https://app.earnmoretrust.com/' );
 			define( 'EMT_INTEGRATION_POSTFIX', 'integrations_data' );
