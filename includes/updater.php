@@ -379,7 +379,7 @@ class WP_GitHub_Updater {
 
 		// check the version and decide if it's new
 		//      $update = version_compare( $this->config['new_version'], $this->config['version'] );
-		$update = version_compare( $this->config['new_version'], $this->config['version'] );
+		$update = version_compare( $this->config['new_version'], EMT_VERSION );
 
 		if ( 1 === $update ) {
 			$response              = new stdClass;

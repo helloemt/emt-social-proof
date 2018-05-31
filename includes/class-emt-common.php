@@ -221,7 +221,7 @@ class Emt_Common {
 	 */
 	public static function get_tab_headings( $tab ) {
 		$my_plugin_tabs = array(
-			'emt-license-activation' => __( 'Enter Your Site Api Keys', 'emt-social-proof' ),
+			'emt-license-activation' => __( 'Api Settings', 'emt-social-proof' ),
 			'emt-integrations'       => __( 'Integrations Settings', 'emt-social-proof' ),
 		);
 
