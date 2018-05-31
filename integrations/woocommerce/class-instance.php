@@ -119,7 +119,7 @@ class Emt_Wc extends Emt_Integrations {
 										$event_fields_value                           = $this->get_single_feed_data( $event_type, $order_data, array(), $event_details['fields'], $extra_data );
 										$event_fields_value['fields']                 = array_merge( $event_fields_value['fields'], $coupons_details );
 										$event_fields_value['fields']['product_id']   = $data_to_send[0]['data'][0]['fields']['product_id'];
-										$event_fields_value['fields']['product_link'] = $data_to_send[0]['data'][0]['fields']['product_link'];
+										$event_fields_value['fields']['product_link'] = apply_filters( 'emt_alter_product_link', $data_to_send[0]['data'][0]['fields']['product_link'], $data_to_send[0]['data'][0]['fields']['product_id'] );
 										$event_fields_value['fields']['product_name'] = $data_to_send[0]['data'][0]['fields']['product_name'];
 										$event_fields_value['image']                  = $data_to_send[0]['data'][0]['image'];
 										$feeds[]                                      = $event_fields_value;
@@ -301,7 +301,7 @@ class Emt_Wc extends Emt_Integrations {
 		$single_feed_details['rating_star']        = $rating;
 		$single_feed_details['rating_number']      = $rating;
 		$single_feed_details['is_verified']        = get_comment_meta( $comment_details['comment_ID'], 'verified', true );
-		$single_feed_details['product_link']       = get_permalink( $product_details->ID );
+		$single_feed_details['product_link']       = apply_filters( 'emt_alter_product_link', get_permalink( $product_details->ID ), $product_details->ID );
 		//      $image                                     = wp_get_attachment_image_src( get_post_thumbnail_id( $product_details->ID ), 'single-post-thumbnail' );
 		$image     = wp_get_attachment_image_src( get_post_thumbnail_id( $product_details->ID ) );
 		$image_url = '';
@@ -517,7 +517,7 @@ class Emt_Wc extends Emt_Integrations {
 				$single_feed_data                 = $this->make_feed_data( $order_data, $extra_data );
 				$single_feed_data['product_name'] = $items_value['name'];
 				$single_feed_data['product_id']   = $items_value['product_id'];
-				$single_feed_data['product_link'] = get_permalink( $items_value['product_id'] );
+				$single_feed_data['product_link'] = apply_filters( 'emt_alter_product_link', get_permalink( $items_value['product_id'] ), $items_value['product_id'] );
 				//              $image                            = wp_get_attachment_image_src( get_post_thumbnail_id( $items_value['product_id'] ), 'single-post-thumbnail' );
 				$image     = wp_get_attachment_image_src( get_post_thumbnail_id( $items_value['product_id'] ) );
 				$image_url = '';

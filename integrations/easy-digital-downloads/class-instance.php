@@ -121,7 +121,7 @@ class Emt_Edd extends Emt_Integrations {
 				$single_feed_data['order_total']  = $largest_item_price;
 				$single_feed_data['product_name'] = $cart_details[ $largest_item_key ]['name'];
 				$single_feed_data['product_id']   = $cart_details[ $largest_item_key ]['id'];
-				$single_feed_data['product_link'] = get_permalink( $cart_details[ $largest_item_key ]['id'] );
+				$single_feed_data['product_link'] = apply_filters( 'emt_alter_product_link', get_permalink( $cart_details[ $largest_item_key ]['id'] ), $cart_details[ $largest_item_key ]['id'] );
 				$image                            = wp_get_attachment_image_src( get_post_thumbnail_id( $cart_details[ $largest_item_key ]['id'] ) );
 				$image_url                        = '';
 				if ( is_array( $image ) && count( $image ) > 0 ) {
