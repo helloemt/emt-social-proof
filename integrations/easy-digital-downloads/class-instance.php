@@ -25,14 +25,15 @@ class Emt_Edd extends Emt_Integrations {
 		/*
 		 * Send Feeds To EMT when order is placed
 		 */
-		add_action( 'edd_insert_payment', array( $this, 'create_single_feed_complete_purchase' ), 11, 2 );
+		add_action( 'edd_complete_purchase', array( $this, 'create_single_feed_complete_purchase' ), 11, 1 );
 	}
 
-	public function create_single_feed_complete_purchase( $payment_id, $payment_data ) {
+	public function create_single_feed_complete_purchase( $payment_id ) {
 		if ( '1' == get_transient( 'emt_feed_' . $this->slug . '_' . $payment_id ) ) {
 			// Do Nothing, feeds have been sent to EMT for this order
 		} else {
-			$all_domains = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
+			$payment_data = edd_get_payment_meta( $payment_id );
+			$all_domains  = Emt_Common::emt_get_option( EMT_ALL_DOMAINS );
 			foreach ( $all_domains as $api_key => $api_secret_key ) {
 				$event_type                      = $this->slug_complete_purchase;
 				Emt_Common::$user_api_key        = $api_key;

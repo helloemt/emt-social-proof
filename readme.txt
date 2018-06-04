@@ -3,10 +3,10 @@ Contributors: amans2k, xlplugins
 Tags: EMT, Earnmore Trust, woocommerce, XLPlugins
 Requires at least: 4.2.1
 Tested up to: 4.8.1
-Stable tag: 1.1.9
+Stable tag: 2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-~Current Version:1.1.9~
+~Current Version:2.0~
 
 == Description ==
 
@@ -18,6 +18,9 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 
 == Changelog ==
+
+= 2.0
+* Fixed: Changed the Easy Digital Downloads feed creation hook to payment complete.
 
 = 1.1.9
 * Added: Filter for changing the product url based on product id.
