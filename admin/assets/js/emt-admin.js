@@ -190,6 +190,13 @@
             });
         // });
 
+        $('.js-example-basic-multiple-non-ajax').select2({
+            // $this.select2({
+            // minimumInputLength: 2,
+            placeholder: "Select Order Status",
+            multiple: true,
+        });
+
 
         $(document).on('submit','.emt-forms',function () {
             var $this = $(this);

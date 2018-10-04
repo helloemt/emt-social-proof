@@ -388,7 +388,6 @@ class WP_GitHub_Updater {
 			//          $response->url         = add_query_arg( array( 'access_token' => $this->config['access_token'] ), $this->config['github_url'] );
 			$response->url     = $this->config['github_url'];
 			$response->package = $this->config['zip_url'];
-
 			// If response is false, don't alter the transient
 			if ( false !== $response ) {
 				$transient->response[ $this->config['plugin_file'] ] = $response;

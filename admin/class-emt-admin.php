@@ -358,6 +358,13 @@ class Emt_Admin {
 				$excluded_products_option_key = 'emt_excluded_' . $_POST['emt_integration_slug'];
 				$exluded_products             = ( isset( $_POST['products'] ) ) ? $_POST['products'] : array();
 				update_option( $excluded_products_option_key, $exluded_products );
+
+				if(isset( $_POST['emt_order_status'] )){
+					$included_order_status_key = 'emt_order_' . $_POST['emt_integration_slug'];
+					$order_status            = $_POST['emt_order_status'];
+					update_option( $included_order_status_key, $order_status );
+                }
+
 				$message  = __( 'Settings Saved', 'emt-social-proof' );
 				$response = array(
 					'status'  => '1',

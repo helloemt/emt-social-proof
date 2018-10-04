@@ -3,10 +3,10 @@ Contributors: amans2k, xlplugins
 Tags: EMT, Earnmore Trust, woocommerce, XLPlugins
 Requires at least: 4.2.1
 Tested up to: 4.8.1
-Stable tag: 2.0
+Stable tag: 2.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-~Current Version:2.0~
+~Current Version:2.2~
 
 == Description ==
 
@@ -18,6 +18,12 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 
 == Changelog ==
+
+= 2.2
+* Added: Filter for changing product name when feed data is made.
+
+= 2.1
+* Added: New feature for excluding order status when syncing feeds in woocommerce.
 
 = 2.0
 * Fixed: Changed the Easy Digital Downloads feed creation hook to payment complete.

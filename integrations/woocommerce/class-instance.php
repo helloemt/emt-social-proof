@@ -2,16 +2,16 @@
 
 class Emt_Wc extends Emt_Integrations {
 
-	private static $instance                = null;
+	private static $instance = null;
 	public static $current_integration_data = array();
-	public static $is_active                = '0';
-	public $slug                            = 'wc';
-	public $plugin_class_name               = 'WooCommerce';
-	public $comment_post_default_keys       = array( 'product_id', 'email', 'ip', 'is_verified' );
-	public $integration_name                = 'WooCommerce';
-	public $current_event_type              = null;
-	public $has_settings                    = true;
-	public $search_posttype                 = 'product';
+	public static $is_active = '0';
+	public $slug = 'wc';
+	public $plugin_class_name = 'WooCommerce';
+	public $comment_post_default_keys = array( 'product_id', 'email', 'ip', 'is_verified' );
+	public $integration_name = 'WooCommerce';
+	public $current_event_type = null;
+	public $has_settings = true;
+	public $search_posttype = 'product';
 
 	public static function get_instance() {
 		if ( null == self::$instance ) {
@@ -31,12 +31,10 @@ class Emt_Wc extends Emt_Integrations {
 		add_action( 'comment_post', array( $this, 'product_review' ), 10, 2 );
 		add_action( 'comment_unapproved_to_approved', array( $this, 'my_approve_comment_callback' ) );
 
-		add_action(
-			'woocommerce_order_status_completed', array(
-				$this,
-				'create_feed_when_order_is_completed',
-			), 10, 1
-		);
+		add_action( 'woocommerce_order_status_completed', array(
+			$this,
+			'create_feed_when_order_is_completed',
+		), 10, 1 );
 
 		//      add_action( 'wp_loaded', array( $this, 'testing_process' ) );
 	}
@@ -77,7 +75,7 @@ class Emt_Wc extends Emt_Integrations {
 									$count ++;
 									if ( is_array( $data_to_send ) && count( $data_to_send ) > 0 ) {
 										foreach ( $data_to_send as $real_data ) {
-											  $this->send_feed( $real_data, true );
+											$this->send_feed( $real_data, true );
 										}
 										set_transient( 'emt_feed_' . $order_id, true, 1 * HOUR_IN_SECONDS );
 									}
@@ -111,9 +109,9 @@ class Emt_Wc extends Emt_Integrations {
 										$feeds                                        = array();
 										$data_to_send                                 = $this->get_new_order_data( $order_id, $order, $order_data, $order_items, $event_id, $event_details, $count );
 										$extra_data                                   = array(
-											'timestamp'   => ( time() + $count ),
-											'order_id'    => $order_id,
-											'order_total' => EMT_Compatibility::get_order_data( $order, '_order_total' ),
+											'timestamp'      => ( time() + $count ),
+											'order_id'       => $order_id,
+											'order_total'    => EMT_Compatibility::get_order_data( $order, '_order_total' ),
 											'payment_method' => EMT_Compatibility::get_payment_gateway_from_order( $order ),
 										);
 										$event_fields_value                           = $this->get_single_feed_data( $event_type, $order_data, array(), $event_details['fields'], $extra_data );
@@ -342,16 +340,20 @@ class Emt_Wc extends Emt_Integrations {
 					if ( isset( $all_emt_events[ $event_id ] ) ) {
 						$event_details              = $all_emt_events[ $event_id ];
 						$data_to_send['trigger_id'] = $event_id;
+						$default_order_status       = array( 'wc-processing', 'wc-on-hold', 'wc-completed' );
+						$included_order_status      = 'emt_order_' . $this->slug;
+						$included_order_status      = get_option( $included_order_status );
+						if ( is_array( $included_order_status ) && count( $included_order_status ) > 0 ) {
+							$default_order_status = $included_order_status;
+						}
 						switch ( $event_type ) {
 							case 'woocommerce_thankyou':
-								$orders = wc_get_orders(
-									array(
+								$orders = wc_get_orders( array(
 										'limit'   => $feed_count,
 										'orderby' => 'date',
 										'order'   => 'DESC',
-										'status'  => array( 'wc-pending', 'wc-processing', 'wc-on-hold', 'wc-completed' ),
-									)
-								);
+										'status'  => $default_order_status,
+									) );
 								if ( is_array( $orders ) && count( $orders ) > 0 ) {
 									$count = 1;
 									foreach ( $orders as $order ) {
@@ -396,14 +398,12 @@ class Emt_Wc extends Emt_Integrations {
 								}
 								break;
 							case 'woocommerce_order_status_completed':
-								$orders = wc_get_orders(
-									array(
+								$orders = wc_get_orders( array(
 										'limit'   => $feed_count,
 										'orderby' => 'date',
 										'order'   => 'DESC',
 										'status'  => array( 'wc-completed' ),
-									)
-								);
+									) );
 								if ( is_array( $orders ) && count( $orders ) > 0 ) {
 									$count = 1;
 									foreach ( $orders as $key1 => $order ) {
@@ -515,7 +515,7 @@ class Emt_Wc extends Emt_Integrations {
 		switch ( $event_type ) {
 			case 'woocommerce_thankyou':
 				$single_feed_data                 = $this->make_feed_data( $order_data, $extra_data );
-				$single_feed_data['product_name'] = $items_value['name'];
+				$single_feed_data['product_name'] = apply_filters( 'emt_alter_product_name', $items_value['name'], $items_value['product_id'] );
 				$single_feed_data['product_id']   = $items_value['product_id'];
 				$single_feed_data['product_link'] = apply_filters( 'emt_alter_product_link', get_permalink( $items_value['product_id'] ), $items_value['product_id'] );
 				//              $image                            = wp_get_attachment_image_src( get_post_thumbnail_id( $items_value['product_id'] ), 'single-post-thumbnail' );
